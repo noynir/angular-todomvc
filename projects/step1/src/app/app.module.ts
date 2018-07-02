@@ -9,6 +9,10 @@ import { environment } from '../environments/environment';
 import { SharedModule } from './shared/shared.module';
 import { TodoModule } from './todo/todo.module';
 import { ThemeContainerComponent } from './theme-container/theme-container.component';
+import { HttpClientModule } from '@angular/common/http';
+import { TaskdbService } from './core/services/taskdb.service';
+import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
 	declarations: [
@@ -17,6 +21,9 @@ import { ThemeContainerComponent } from './theme-container/theme-container.compo
 	],
 	imports: [
 		BrowserModule,
+		HttpClientModule,
+		HttpClientInMemoryWebApiModule.forRoot(TaskdbService),
+		EffectsModule.forRoot([]),
 		StoreModule.forRoot(reducers, { metaReducers }),
 		!environment.production ? StoreDevtoolsModule.instrument() : [],
 		SharedModule,

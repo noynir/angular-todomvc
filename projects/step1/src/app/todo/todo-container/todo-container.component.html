@@ -1,0 +1,5 @@
+<app-tasks
+	[todos]="tasks$ | async"
+	(taskFiltered)="filterTasks($event)"
+>
+</app-tasks>

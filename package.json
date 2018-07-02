@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-	 "start": "ng serve step1",
+    "start": "ng serve step1",
     "build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
@@ -27,6 +27,7 @@
     "@ngrx/store": "^6.0.1",
     "@ngrx/store-devtools": "^6.0.1",
     "angular-autofocus-fix": "^0.1.0",
+    "angular-in-memory-web-api": "^0.6.0",
     "core-js": "^2.4.1",
     "rxjs": "^6.2.1",
     "todomvc-app-css": "^2.0.0",
