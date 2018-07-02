@@ -7,6 +7,8 @@ import {RouterModule, Routes} from '@angular/router';
 import {TodoComponent} from './todo/todo.component';
 import {TodoService} from './todo.service';
 import {AppComponent} from './app.component';
+import { StoreModule } from '@ngrx/store';
+import * as fromTheme from './theme.reducer';
 
 
 const routes: Routes = [
@@ -23,7 +25,8 @@ const routes: Routes = [
 		BrowserModule,
 		FormsModule,
 		AutofocusModule,
-		RouterModule.forRoot(routes, {useHash: true})
+		RouterModule.forRoot(routes, {useHash: true}),
+		StoreModule.forFeature('theme', fromTheme.reducer)
 	],
 	providers: [TodoService],
 	bootstrap: [AppComponent]

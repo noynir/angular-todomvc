@@ -4,7 +4,7 @@ import {Subscription} from 'rxjs';
 
 import {Todo, TodoUtils} from './todo.model';
 import {Filter, FilterUtil} from './filter.model';
-import {TodoService} from '../todo.service';
+import {TodoService} from './todo.service';
 
 
 @Component({
@@ -27,16 +27,11 @@ export class TodoComponent implements OnInit, DoCheck, OnDestroy {
 	remaining: number;
 	allCompleted: boolean;
 
-
-	constructor(private todoService: TodoService, private route: ActivatedRoute) {
+	constructor(private todoService: TodoService) {
 	}
 
-	// ~ lifecycle
-
 	ngOnInit() {
-		this.routeSubscription = this.route.params.subscribe(params => {
-			this.filter = FilterUtil.fromString(params['filter']);
-		});
+
 	}
 
 	ngDoCheck() {

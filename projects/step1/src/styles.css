@@ -1,0 +1,12 @@
+@import '~todomvc-common/base.css';
+@import '~todomvc-app-css/index.css';
+
+body.dark {
+	background-color: #363434;
+}
+
+body.dark .todoapp h1 {
+	color:#f7ff0a8f;
+}
+
+
