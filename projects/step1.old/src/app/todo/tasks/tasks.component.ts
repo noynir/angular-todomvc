@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Task } from '../../core/models/task.model';
+import { TaskModel } from '../../core/models/task.model';
 import { Filter } from '../filter.model';
 
 @Component({
@@ -9,22 +9,22 @@ import { Filter } from '../filter.model';
 })
 export class TasksComponent implements OnInit {
 
-	@Input() todos: Task[] = [];
+	@Input() todos: TaskModel[] = [];
 
 	@Output() taskSubmitted = new EventEmitter<string>();
 
 	@Output() tasksToggleAll = new EventEmitter<boolean>();
 
-	@Output() taskToggle = new EventEmitter<Task>();
+	@Output() tasksToggle = new EventEmitter<TaskModel>();
 
-	@Output() taskDeleted = new EventEmitter<Task>();
+	@Output() taskDeleted = new EventEmitter<TaskModel>();
 
 	@Output() taskFiltered = new EventEmitter<Filter>();
 
 
 	newTodo = '';
-	currentTodo: Task;
-	snapshot: Task;
+	currentTodo: TaskModel;
+	snapshot: TaskModel;
 
 	filter = Filter.ALL;
 	completed: number;
@@ -48,7 +48,7 @@ export class TasksComponent implements OnInit {
 		this.newTodo = '';
 	}
 
-	edit(todo: Task) {
+	edit(todo: TaskModel) {
 		this.currentTodo = todo;
 		this.snapshot = Object.assign({}, todo);
 	}
@@ -59,19 +59,18 @@ export class TasksComponent implements OnInit {
 		this.snapshot = null;
 	}
 
-	update(todo: Task) {
+	update(todo: TaskModel) {
 		this.currentTodo = null;
 		this.snapshot = null;
 		// this.todoService.update(todo);
 	}
 
-	delete(todo: Task) {
+	delete(todo: TaskModel) {
 		this.taskDeleted.emit(todo);
 	}
 
-	toggle(task: Task) {
-		task.completed = !task.completed;
-		this.taskToggle.emit(task);
+	toggle(task: TaskModel) {
+		this.tasksToggle.emit(task);
 	}
 
 	toggleAll(completed: boolean) {

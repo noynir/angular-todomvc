@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { TodoContainerComponent } from './todo-container/todo-container.component';
 import { TasksComponent } from './tasks/tasks.component';
 
+
 @NgModule({
 	imports: [ CommonModule,
-		FormsModule,
+		FormsModule
 	],
 	declarations: [TodoContainerComponent, TasksComponent],
-	exports:[TodoContainerComponent]
+	providers: [],
+	exports: [TodoContainerComponent]
 })
 export class TodoModule {
 

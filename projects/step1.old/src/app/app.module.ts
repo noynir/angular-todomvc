@@ -22,7 +22,7 @@ import { EffectsModule } from '@ngrx/effects';
 	imports: [
 		BrowserModule,
 		HttpClientModule,
-		HttpClientInMemoryWebApiModule.forRoot(TaskdbService,{put204:false, delete404:false}),
+		HttpClientInMemoryWebApiModule.forRoot(TaskdbService),
 		EffectsModule.forRoot([]),
 		StoreModule.forRoot(reducers, { metaReducers }),
 		!environment.production ? StoreDevtoolsModule.instrument() : [],

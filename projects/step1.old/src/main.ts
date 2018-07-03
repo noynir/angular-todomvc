@@ -10,7 +10,3 @@ if (environment.production) {
 
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.log(err));
-
-
-// ng g st todo/Todo  -m todo.module.ts --project step3
-// ng g en todo/Task --group true --reducers reducers/index.ts --project step3
