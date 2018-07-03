@@ -4,7 +4,7 @@
 			<input class="new-todo" placeholder="What needs to be done?"
 					 #todo [(ngModel)]="newTodo" (keyup.enter)="create(todo.value)" autofocus>
 		</header>
-		<section *ngIf="todos.length > 0" class="main">
+		<section *ngIf="todos && todos.length > 0" class="main">
 			<input class="toggle-all" id="toggle-all" type="checkbox"
 					 #inputToggleAll [checked]="allCompleted" (click)="toggleAll(inputToggleAll.checked)">
 			<label for="toggle-all">Mark all as complete</label>
@@ -23,7 +23,7 @@
 				</li>
 			</ul>
 		</section>
-		<footer *ngIf="todos.length > 0" class="footer">
+		<footer *ngIf="todos && todos.length > 0" class="footer">
 			<span class="todo-count"><strong>{{remaining}}</strong> item{{remaining !== 1 ? 's' : ''}} left</span>
 
 			<ul class="filters">

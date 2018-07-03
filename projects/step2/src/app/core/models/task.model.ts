@@ -1,5 +1,5 @@
 
-export class TaskModel {
+export class Task {
 	id: number;
 	title: string;
 	completed: boolean;

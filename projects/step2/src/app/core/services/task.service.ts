@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { throwError, Observable } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { TaskModel } from '../models/task.model';
-import { catchError } from 'rxjs/operators';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { Task } from '../models/task.model';
+import { catchError, tap, map } from 'rxjs/operators';
 
 @Injectable({
 	providedIn: 'root'
@@ -14,16 +14,16 @@ export class TaskService {
 
 	constructor (private http: HttpClient) { }
 
-	getTasks (): Observable<TaskModel[]> {
-		return this.http.get<TaskModel[]>(this.tasksUrl).pipe(
+	getTasks (): Observable<Task[]> {
+		return this.http.get<Task[]>(this.tasksUrl).pipe(
 			catchError(this.handleError)
 		);
 	}
 
 	// This get-by-id will 404 when id not found
-	getTask(id: number): Observable<TaskModel> {
+	getTask(id: number): Observable<Task> {
 		const url = `${this.tasksUrl}/${id}`;
-		return this.http.get<TaskModel>(url).pipe(
+		return this.http.get<Task>(url).pipe(
 			catchError(this.handleError)
 		);
 	}
@@ -35,35 +35,37 @@ export class TaskService {
 	//     .map(heroes => heroes[0] as Hero)
 	//     .catch(this.handleError);
 	// }
-	addTask (title: string, completed = false): Observable<TaskModel> {
+	addTask (title: string, completed = false): Observable<Task> {
 		const task = { id: this.generateId(), title, completed };
 
-		return this.http.post<TaskModel>(this.tasksUrl, task).pipe(
+		return this.http.post<Task>(this.tasksUrl, task).pipe(
 			catchError(this.handleError)
 		);
 	}
 
-	deleteTask (task: TaskModel | number): Observable<TaskModel> {
+	deleteTask (task: Task | number): Observable<number> {
 		const id = typeof task === 'number' ? task : task.id;
 		const url = `${this.tasksUrl}/${id}`;
 
-		return this.http.delete<TaskModel>(url).pipe(
+		return this.http.delete<Task>(url).pipe(
+			map(() => id),
 			catchError(this.handleError)
 		);
 	}
 
-	searchTasks(completed: boolean = null): Observable<TaskModel[]> {
+	searchTasks(completed: boolean = null): Observable<Task[]> {
 		// add safe, encoded search parameter if term is present
 		const options = completed != null ?
 			{ params: new HttpParams().set('completed', completed.toString() ) } : {};
 
-			return this.http.get<TaskModel[]>(this.tasksUrl, options).pipe(
+			return this.http.get<Task[]>(this.tasksUrl, options).pipe(
 				catchError(this.handleError)
 			);
 	}
 
-	updateHero (task: TaskModel): Observable<null | TaskModel> {
-		return this.http.put<TaskModel>(this.tasksUrl, task).pipe(
+	updateTask (task: Task): Observable<Task> {
+		const url = `${this.tasksUrl}`;
+		return this.http.put<Task>(url, task).pipe(
 			catchError(this.handleError)
 		);
 	}

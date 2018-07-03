@@ -2,21 +2,21 @@ import { TestBed, inject } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable } from 'rxjs';
 
-import { TodoEffects } from './todo.effects';
+import { TaskEffects } from './task.effects';
 
-describe('TodoService', () => {
+describe('TaskService', () => {
   let actions$: Observable<any>;
-  let effects: TodoEffects;
+  let effects: TaskEffects;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        TodoEffects,
+        TaskEffects,
         provideMockActions(() => actions$)
       ]
     });
 
-    effects = TestBed.get(TodoEffects);
+    effects = TestBed.get(TaskEffects);
   });
 
   it('should be created', () => {

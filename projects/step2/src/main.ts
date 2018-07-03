@@ -12,4 +12,5 @@ platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.log(err));
 
 
-// ng g reducer todo/todo  -r reducers/index.ts -g true --project step3
+// ng g st todo/Todo  -m todo.module.ts --project step3
+// ng g en todo/Task --group true --reducers reducers/index.ts --project step3
