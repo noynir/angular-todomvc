@@ -1,0 +1,3 @@
+ng generate store State --root -m app.module.ts --project step1
+ng generate reducer theme --reducers reducers/index.ts --group true --project step1
+ng generate action theme --group true --project step1

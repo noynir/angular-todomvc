@@ -1,8 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as fromStore from '../reducers/theme.reducer';
-import * as fromRoot from '../reducers/';
-import { ToggleDarkTheme } from '../actions/theme.actions';
+// import * as fromStore from '../reducers/theme.reducer';
+// import * as fromRoot from '../reducers/';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
@@ -14,18 +13,17 @@ import { DOCUMENT } from '@angular/common';
 })
 export class ThemeContainerComponent implements OnInit {
 
-	isDarkMode$:Observable<boolean>;
 
-	constructor(private store: Store<fromStore.State>,
-		 @Inject(DOCUMENT) private document: Document) { }
+
+	constructor(@Inject(DOCUMENT) private document: Document
+	, /*private store: Store<fromStore.State>*/) { }
 
 	ngOnInit() {
-		this.isDarkMode$ = this.store.select(fromRoot.getThemeIsDark)
-			.pipe(tap((isDark) => this.changeTheme(isDark)));
+
 	}
 
 	switchChanged(isOn: boolean) {
-		this.store.dispatch(new ToggleDarkTheme(isOn));
+
 	}
 
 	changeTheme(isDark: boolean){

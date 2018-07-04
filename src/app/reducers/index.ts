@@ -6,13 +6,16 @@ import {
   MetaReducer
 } from '@ngrx/store';
 import { environment } from '../../environments/environment';
+import * as fromTheme from '../theme.reducer';
 
 export interface State {
 
+  theme: fromTheme.State;
 }
 
 export const reducers: ActionReducerMap<State> = {
 
+  theme: fromTheme.reducer,
 };
 
 

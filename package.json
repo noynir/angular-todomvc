@@ -6,6 +6,7 @@
     "ng": "ng",
     "start:step1": "ng serve step1",
     "start:step2": "ng serve step2",
+    "start:step3": "ng serve step3",
     "start": "ng serve step3",
     "start:step4": "ng serve step4",
     "build": "ng build --prod",
