@@ -8,7 +8,10 @@ import {TodoComponent} from './todo/todo.component';
 import {TodoService} from './todo.service';
 import {AppComponent} from './app.component';
 import { StoreModule } from '@ngrx/store';
-import * as fromTheme from './theme.reducer';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { TaskdbService } from './core/services/taskdb.service';
+import { TodoModule } from './todo/todo.module';
 
 
 const routes: Routes = [
@@ -18,15 +21,15 @@ const routes: Routes = [
 
 @NgModule({
 	declarations: [
-		AppComponent,
-		TodoComponent
+		AppComponent
 	],
 	imports: [
 		BrowserModule,
 		FormsModule,
 		AutofocusModule,
-		RouterModule.forRoot(routes, {useHash: true}),
-		StoreModule.forFeature('theme', fromTheme.reducer)
+		TodoModule,
+		HttpClientModule,
+		HttpClientInMemoryWebApiModule.forRoot(TaskdbService,{put204:false, delete404:false})
 	],
 	providers: [TodoService],
 	bootstrap: [AppComponent]
