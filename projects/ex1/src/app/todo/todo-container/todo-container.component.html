@@ -1,0 +1,8 @@
+<app-tasks
+	[todos]="tasks"
+	(taskFiltered)="filterTasks($event)"
+	(taskSubmitted)="submitTask($event)"
+	(taskToggle)="toggleTask($event)"
+	(taskDeleted)="removeTask($event)"
+>
+</app-tasks>
