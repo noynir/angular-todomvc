@@ -6,8 +6,9 @@ import { Task } from "../../core/models/task.model";
 import { TaskService } from "../../core/services/task.service";
 import { withLatestFrom, map, tap } from "rxjs/operators";
 import * as fromTasks from '../reducers/filter.reducer';
-import { getCurrentFilter } from "../reducers";
+import { getCurrentFilter, getTaskEntities } from "../reducers";
 import { FilterTasks } from "../actions/filter.actions";
+import { FetchTasks, CreateTask, RemoveTask, PutTask } from "../actions/task.actions";
 
   
 @Component({
@@ -16,23 +17,19 @@ import { FilterTasks } from "../actions/filter.actions";
 	styleUrls: ["./todo-container.component.css"]
 })
 export class TodoContainerComponent implements OnInit {
-	tasks: Task[] = [];
+	tasks$: Observable<Task[]>;
 	private currentFilter$: Observable<Filter>;
 
 
 	constructor(
-		private store: Store<fromTasks.State>,
-		private taskService: TaskService) {}
+		private store: Store<fromTasks.State>) {}
 
 	ngOnInit() {
-
+		this.tasks$ = this.store.select(getTaskEntities);
 		this.currentFilter$ = this.store.select( getCurrentFilter )
 			.pipe(
 				tap( (filter) => this.fetchTasks(filter))
 			);
-		
-		
-		
 	}
 
 	filterTasks(filter: Filter) {
@@ -40,39 +37,17 @@ export class TodoContainerComponent implements OnInit {
 	}
 
 	fetchTasks(filter: Filter){
-
-		if(filter === Filter.ALL){	
-			this.taskService.getTasks()
-				.subscribe( (tasks) => this.tasks = tasks)
-		}
-		else {
-			this.taskService.searchTasks(filter === Filter.COMPLETED)
-				.subscribe( (tasks) => this.tasks = tasks)
-		}
-
+		this.store.dispatch(new FetchTasks({ filter }));
 	}
 	submitTask(title: string) {
-		this.taskService.addTask(title)
-			.pipe(
-				withLatestFrom(this.currentFilter$)
-			)
-			.subscribe( ([task,filter]) => this.fetchTasks(filter) );
+		this.store.dispatch(new CreateTask( {task:new Task(null, title)}));
 	}
 
 	removeTask(task: Task) {
-		this.taskService.deleteTask(task)
-			.pipe(
-				withLatestFrom(this.currentFilter$)
-			)
-			.subscribe( ([task, filter]) => this.fetchTasks(filter) );
+		this.store.dispatch(new RemoveTask({id:task.id}));
 	}
 
 	toggleTask(task: Task) {
-		
-		this.taskService.updateTask(task)
-			.pipe(
-				withLatestFrom(this.currentFilter$)
-			)
-			.subscribe( ( [task,filter] ) => this.fetchTasks(filter) );
+		this.store.dispatch(new PutTask({task}));
 	}
 }

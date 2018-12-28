@@ -40,29 +40,26 @@ In this exercise we will setup our store create our first actions and reducers, 
 
 - Create an action file for Tasks related actions.
 ```bash
-ng g action todo/Task --group
+ng g action todo/Filter --group
 ```
-- Go to the file created `todo/actions/tasks.actions.ts`.
+- Go to the file created `todo/actions/filter.actions.ts`.
   - Create a new Action for handling the state transitions of the currentFilter that filters the list.
-  - Add a new action type to `TasksActionTypes` enum
+  - Add a new action type to `FilterActionTypes` enum and remove the exsiting one.
   ```typescript
-  export enum TasksActionTypes {
-    LoadTasks = '[Tasks] Load Tasks',
+  export enum FilterActionTypes {
     FilterTasks = '[Tasks] filter tasks'
   }
   ```
   - Create a new `FilterTasks` action class to define the Action and it's payload.
   ```typescript
   export class FilterTasks implements Action {
-    readonly type = TasksActionTypes.FilterTasks;
+    readonly type = FilterActionTypes.FilterTasks;
     constructor(public payload:{ filter:Filter }){}
   }
   ```
   - Add the FilterTasks class to `TasksActions` union type
   ```typescript
-  export type TasksActions = 
-  LoadTasks
-  | FilterTasks;
+  export type FilterActions =  FilterTasks;
   ```
   
 ### Step 2 - Create the state
@@ -80,9 +77,9 @@ ng g store todo/Tasks -m todo.module.ts
 
 - Create the tasks list reducer of the feature state
 ```bash
-ng generate reducer todo/List --reducers reducers/index.ts --group 
+ng generate reducer todo/Filter --reducers reducers/index.ts --group 
 ```
-- Inside the file created `todo/reducers/list.reducer.ts`
+- Inside the file created `todo/reducers/filter.reducer.ts`
   - Add the currentFilter property to the State interface, this props will hold the current filter the task list is filtered by.
   ```typescript
   export interface State {
@@ -97,9 +94,9 @@ ng generate reducer todo/List --reducers reducers/index.ts --group
   ```
   - Inside the reducer function add a case to the switch to handle the chages of the currentFilter state when the `FilterTasks` action is dispatched
   ```typescript
-  export function reducer(state = initialState, action: fromTasks.TasksActions): State {
+  export function reducer(state = initialState, action: FilterActions): State {
     switch (action.type) {
-        case fromTasks.TasksActionTypes.FilterTasks:
+        case FilterActionTypes.FilterTasks:
         return { ...state, currentFilter: action.payload.filter };
         default:
         return state;
@@ -107,22 +104,22 @@ ng generate reducer todo/List --reducers reducers/index.ts --group
   }
   ```
 ### Step 4 - Create Selectors
-- Inside `todo/reducers/list.reducer.ts` create selectors for the selecting the Tasks list and current filter
+- Inside `todo/reducers/index.ts` create selectors for the selecting the Tasks current filter
     - create a feature selector
     ```typescript
     export const getTasks = createFeatureSelector<State>('tasks');
     ```
     - create a selector for the list state
     ```typescript
-    export const getList = createSelector( 
+    export const getFilter = createSelector( 
       getTasks,
-      (state) =>  state.list
+      (state) =>  state.filter
     )
     ```
     - create a selector for the currentFilter 
     ```typescript
-    export const getListCurrentFilter= createSelector(
-      getList,
+    export const getCurrentFilter= createSelector(
+      getFilter,
       (state) => state.currentFilter
     )
     ```
@@ -141,7 +138,7 @@ private currentFilter$: Observable<Filter>;
 -  Inside the `ngOnInit` method set the new `currentFilter$` observable to select the currentFilter from the state via the store service.
 -  Add the `tap` operator for the observable, so that on every filter change new tasks will be fetched. 
 ```typescript
-this.currentFilter$ = this.store.select( getListCurrentFilter )
+this.currentFilter$ = this.store.select( getCurrentFilter )
 			.pipe(
 				tap( (filter) => this.fetchTasks(filter))
 			);
@@ -180,9 +177,188 @@ this.currentFilter$ = this.store.select( getListCurrentFilter )
 	}
   ```
 
+## Exercise 2 - Effects & Entity
+
+### step 1 - Create and define Entity & Actions
+
+- Create the task entity reducer and actions using the cli
+```bash
+ng g entity todo/Task --reducers reducers/index.ts --group true
+```
+This will setup entity actions and reducer.
+
+- Because all actions realted to the Task entity are also async we will need to setup effects and some additional actions
+- in the `todo/actions/task.actions.ts` file add to the `TaskActionTypes` enum actions types for fetching, creating, updating, and removing tasks.
+```typescript
+export enum TaskActionTypes {
+  ...
+  FetchTasks="[Task] Fetch Tasks",
+  CreateTask="[Task] Create Tasks",
+  PutTask="[Task] Put Tasks",
+  RemoveTask = "[Task] Remove Task"
+  
+}
+```
+- Add action classes for every type
+```typescript
+export class FetchTasks implements Action {
+	readonly type = TaskActionTypes.FetchTasks;
+	constructor(public payload: {filter:Filter}){}
+}
+
+export class CreateTask implements Action {
+	readonly type = TaskActionTypes.CreateTask;
+	constructor(public payload: {task:Task}){}
+}
+
+export class PutTask implements Action {
+	readonly type = TaskActionTypes.PutTask;
+	constructor(public payload: {task:Task}){}
+}
+export class RemoveTask implements Action {
+	readonly type = TaskActionTypes.RemoveTask;
+	constructor(public payload: {id:number}){}
+}
+```
+- Inside `todo/reducers/index.ts` create selectors for selecting the Tasks, by using the `selectAll` selector from the entity adapter.
+```typescript
+
+export const getTask = createSelector( getTasks, (state) =>  state.task );
+export const getTaskEntities = createSelector(getTask, fromTask.selectAll);
+
+``` 
+
+### step2 - Create Effects
+
+- create an Effects service for the tasks actions
+```bash
+ng g effect todo/Task -m todo/todo.module.ts --group true
+```
+- Inject to the consturctor the `TaskService`;
+```typescript
+ constructor(private actions$: Actions, private taskService: TaskService) {}
+```
+- create an Effect for fetching task that should listen to the `FetchTasks` action and after fetching the tasks should dispatch a `LoadTasks` action.
+```typescript
+ @Effect()
+	tasks$ = this.actions$.ofType<FetchTasks>(TaskActionTypes.FetchTasks).pipe(
+		switchMap(action => {
+			if (action.payload.filter !== Filter.ALL) {
+				return this.taskService.searchTasks(
+					action.payload.filter === Filter.COMPLETED
+				);
+			}
+			return this.taskService.getTasks();
+		}),
+		map(tasks => new LoadTasks({ tasks }))
+	);
+```
+- Create an effect for upserting tasks that will listen to the `CreateTask` and `PutTask`. at the end the effect should dispatch the `UpsertTask` action.
+  ```typescript
+  @Effect()
+	upsertTask$ = this.actions$
+		.ofType<CreateTask | PutTask>(
+			TaskActionTypes.CreateTask,
+			TaskActionTypes.PutTask
+		)
+		.pipe(
+			switchMap(action => {
+				if (action.type === TaskActionTypes.CreateTask) {
+					return this.taskService.addTask(action.payload.task.title);
+				} else {
+					return this.taskService.updateTask(action.payload.task);
+				}
+			}),
+			map(task => new UpsertTask({ task }))
+		);
+  ```
+- Create an effect for removing tasks the will listen to the `RemoveTask` action and at the end should dispatch a `DeleteTask` action.
+  ```typescript
+  @Effect()
+	removeTask$ = this.actions$
+		.ofType<RemoveTask>(TaskActionTypes.RemoveTask)
+			.pipe(
+				switchMap(action => this.taskService.deleteTask(action.payload.id)),
+				map(id => new DeleteTask({ id: id.toString()  }) )
+			)
+  ```
+- In the `src/App.module.ts` and to the imports an `EffectsModule.forRoot` import.
+```typescript
+  @NgModule({
+	declarations: [
+		AppComponent,
+		ThemeContainerComponent
+	],
+	imports: [
+		BrowserModule,
+		HttpClientModule,
+		HttpClientInMemoryWebApiModule.forRoot(TaskdbService,{put204:false, delete404:false}),
+		EffectsModule.forRoot([]),
+		StoreModule.forRoot(reducers, { metaReducers }),
+		!environment.production ? StoreDevtoolsModule.instrument() : [],
+		SharedModule,
+		TodoModule
+	],
+	providers: [],
+	bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+### Step 3 - Connect the Component
+- Inside the `todo/todo-container/todo-container.component.ts` add the Store service to the component.
+- Update the `fetchTasks` method to only dispatch a `fetchTasks` action
+  ```typescript
+  this.store.dispatch(new FetchTasks({ filter }));
+  ``` 
+- Update the `submitTask`, `removeTask` and `toggleTask` method to only dispatch actions.
+```typescript
+	fetchTasks(filter: Filter){
+		this.store.dispatch(new FetchTasks({ filter }));
+	}
+	submitTask(title: string) {
+		this.store.dispatch(new CreateTask( {task:new Task(null, title)}));
+	}
+
+	removeTask(task: Task) {
+		this.store.dispatch(new RemoveTask({id:task.id}));
+	}
+
+	toggleTask(task: Task) {
+		this.store.dispatch(new PutTask({task}));
+	}
+```
+- Change to `tasks` property to an Observable of `Task[]`
+  ```typescript
+  tasks$: Observable<Task[]>;
+  ```
+- Inside the `ngOnInit` initialize it by selecting it from the state
+```typescript
+	ngOnInit() {
+		this.tasks$ = this.store.select(getTaskEntities);
+		this.currentFilter$ = this.store.select( getCurrentFilter )
+			.pipe(
+				tap( (filter) => this.fetchTasks(filter))
+			);
+	}
+```
+-  Inside the `todo/todo-container/todo-container.component.html` update the tasks binding
+```html
+<app-tasks
+	[todos]="tasks$ | async"
+	[filter]="currentFilter$ | async"
+	(taskFiltered)="filterTasks($event)"
+	(taskSubmitted)="submitTask($event)"
+	(taskToggle)="toggleTask($event)"
+	(taskDeleted)="removeTask($event)"
+>
+</app-tasks>
+``` 
 
 
   
+
+
+
 
 
 TodoMVC implementation based on [Angular](https://angular.io) version 6 and [ngrx](https://github.com/ngrx/platform) . 

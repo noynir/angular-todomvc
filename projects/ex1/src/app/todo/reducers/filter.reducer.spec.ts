@@ -1,4 +1,4 @@
-import { reducer, initialState } from './list.reducer';
+import { reducer, initialState } from './filter.reducer';
 
 describe('List Reducer', () => {
   describe('unknown action', () => {
