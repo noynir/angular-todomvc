@@ -11,6 +11,8 @@ export class TasksComponent implements OnInit {
 
 	@Input() todos: Task[] = [];
 
+	@Input() filter = Filter.ALL;
+
 	@Output() taskSubmitted = new EventEmitter<string>();
 
 	@Output() tasksToggleAll = new EventEmitter<boolean>();
@@ -26,7 +28,7 @@ export class TasksComponent implements OnInit {
 	currentTodo: Task;
 	snapshot: Task;
 
-	filter = Filter.ALL;
+	
 	completed: number;
 	remaining: number;
 	allCompleted: boolean;

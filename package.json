@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
+    "start:ex1": "ng serve ex1",
     "start:step1": "ng serve step1",
     "start:step2": "ng serve step2",
     "start:step3": "ng serve step3",

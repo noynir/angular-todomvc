@@ -1,11 +1,37 @@
-# LAB Angular TodoMVC with ngrx
+# Angular TodoMVC with ngrx - Step by Step tutorial
 
 In this lab you will refactor a simole TodoMVC angular to use the ngrx platform for state managment.
+- this repo containes a number of projects.
+  - the main project you are refactoring is under the `src` folder.
+  - solution for both exercises are under ther `projects` folder.
+  - if you would like to run either one of the solutions you can do so with the following command in your terminal.
+  ```bash
+  //exercise 1
+  npm run start:ex1 
+  
+  //exercise 2
+  npm run start:ex2
+  ``` 
 
 > ### Note:
 >This lab **already contains all the neccesary ngrx dependencies** but when starting a clean project you should follow these steps
 >- [Create a new angular project](https://angular.io/guide/quickstart#step-1-install-the-angular-cli) 
 >- [Setup ngrx Schematics and ngrx dependencies](https://next.ngrx.io/guide/schematics)
+
+## Lab Setup
+
+- Clone or dowload this repo.
+- In your terminal `cd` into your local repo folder.
+- install dependencies
+  ```bash
+  npm install
+  ```  
+- run the project
+  ```bash
+  npm start.
+  ```
+
+
 
 ## Exercise 1 - Setup The Store
 In this exercise we will setup our store create our first actions and reducers, and connect our container component to listen for state changes. 
@@ -80,7 +106,81 @@ ng generate reducer todo/List --reducers reducers/index.ts --group
     }
   }
   ```
-  ### Step 4 - connect the component
+### Step 4 - Create Selectors
+- Inside `todo/reducers/list.reducer.ts` create selectors for the selecting the Tasks list and current filter
+    - create a feature selector
+    ```typescript
+    export const getTasks = createFeatureSelector<State>('tasks');
+    ```
+    - create a selector for the list state
+    ```typescript
+    export const getList = createSelector( 
+      getTasks,
+      (state) =>  state.list
+    )
+    ```
+    - create a selector for the currentFilter 
+    ```typescript
+    export const getListCurrentFilter= createSelector(
+      getList,
+      (state) => state.currentFilter
+    )
+    ```
+  
+### Step 5 - Connect the container component
+- Inside the `todo/todo-container/todo-container.component.ts` add the Store service to the component.
+```typescript
+constructor(
+		private store: Store<fromTasks.State>,
+		private taskService: TaskService) {}
+```
+-  Update the `currentFilter` to be an `observable<Filter>` and add the $ suffix to it's name.
+```typescript
+private currentFilter$: Observable<Filter>;
+```
+-  Inside the `ngOnInit` method set the new `currentFilter$` observable to select the currentFilter from the state via the store service.
+-  Add the `tap` operator for the observable, so that on every filter change new tasks will be fetched. 
+```typescript
+this.currentFilter$ = this.store.select( getListCurrentFilter )
+			.pipe(
+				tap( (filter) => this.fetchTasks(filter))
+			);
+```
+- In the `submitTask`, `removeTask` and `toggleTask` methods, pipe the `withLatestFrom` operator to get the latest filter value from the `currentFilter$` observable.
+  ```typescript
+  submitTask(title: string) {
+		this.taskService.addTask(title)
+			.pipe(
+				withLatestFrom(this.currentFilter$)
+			)
+			.subscribe( ([task,filter]) => this.fetchTasks(filter) );
+	}
+
+	removeTask(task: Task) {
+		this.taskService.deleteTask(task)
+			.pipe(
+				withLatestFrom(this.currentFilter$)
+			)
+			.subscribe( ([task, filter]) => this.fetchTasks(filter) );
+	}
+
+	toggleTask(task: Task) {
+		
+		this.taskService.updateTask(task)
+			.pipe(
+				withLatestFrom(this.currentFilter$)
+			)
+			.subscribe( ( [task,filter] ) => this.fetchTasks(filter) );
+	}
+  ```
+- update the `filterTasks` method to dispatch the `FilterTasks` action.
+  ```typescript
+  filterTasks(filter: Filter) {
+		this.store.dispatch(new FilterTasks({filter}));
+	}
+  ```
+
+
 
   
 

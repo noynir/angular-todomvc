@@ -19,15 +19,15 @@ export class TodoContainerComponent implements OnInit {
 	constructor(private taskService: TaskService) {}
 
 	ngOnInit() {
-		this.fetchTasks();
+		this.fetchTasks(this.currentFilter);
 	}
 
 	filterTasks(filter: Filter) {
 		this.currentFilter = filter;
-		this.fetchTasks();
+		this.fetchTasks(filter);
 	}
 
-	fetchTasks(){
+	fetchTasks(filter: Filter){
 
 		if(this.currentFilter === Filter.ALL){	
 			this.taskService.getTasks()
@@ -41,17 +41,17 @@ export class TodoContainerComponent implements OnInit {
 	}
 	submitTask(title: string) {
 		this.taskService.addTask(title)
-			.subscribe( (task) => this.fetchTasks() );
+			.subscribe( (task) => this.fetchTasks(this.currentFilter) );
 	}
 
 	removeTask(task: Task) {
 		this.taskService.deleteTask(task)
-			.subscribe( (task) => this.fetchTasks() );
+			.subscribe( (task) => this.fetchTasks(this.currentFilter) );
 	}
 
 	toggleTask(task: Task) {
 		
 		this.taskService.updateTask(task)
-			.subscribe( (task) => this.fetchTasks() );
+			.subscribe( (task) => this.fetchTasks(this.currentFilter) );
 	}
 }

@@ -1,5 +1,6 @@
 <app-tasks
 	[todos]="tasks"
+	[filter]="currentFilter$ | async"
 	(taskFiltered)="filterTasks($event)"
 	(taskSubmitted)="submitTask($event)"
 	(taskToggle)="toggleTask($event)"
