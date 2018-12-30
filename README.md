@@ -241,7 +241,8 @@ ng g effect todo/Task -m todo/todo.module.ts --group true
 - create an Effect for fetching task that should listen to the `FetchTasks` action and after fetching the tasks should dispatch a `LoadTasks` action.
 ```typescript
  @Effect()
-	tasks$ = this.actions$.ofType<FetchTasks>(TaskActionTypes.FetchTasks).pipe(
+	tasks$ = this.actions$.pipe(
+		ofType<FetchTasks>(TaskActionTypes.FetchTasks),	
 		switchMap(action => {
 			if (action.payload.filter !== Filter.ALL) {
 				return this.taskService.searchTasks(
@@ -257,11 +258,11 @@ ng g effect todo/Task -m todo/todo.module.ts --group true
   ```typescript
   @Effect()
 	upsertTask$ = this.actions$
-		.ofType<CreateTask | PutTask>(
-			TaskActionTypes.CreateTask,
-			TaskActionTypes.PutTask
-		)
 		.pipe(
+			ofType<CreateTask | PutTask>(
+				TaskActionTypes.CreateTask,
+				TaskActionTypes.PutTask
+			),
 			switchMap(action => {
 				if (action.type === TaskActionTypes.CreateTask) {
 					return this.taskService.addTask(action.payload.task.title);
@@ -276,8 +277,8 @@ ng g effect todo/Task -m todo/todo.module.ts --group true
   ```typescript
   @Effect()
 	removeTask$ = this.actions$
-		.ofType<RemoveTask>(TaskActionTypes.RemoveTask)
 			.pipe(
+				ofType<RemoveTask>(TaskActionTypes.RemoveTask),
 				switchMap(action => this.taskService.deleteTask(action.payload.id)),
 				map(id => new DeleteTask({ id: id.toString()  }) )
 			)
